@@ -1,8 +1,56 @@
-Custom Marlin firmare made by Srg_Whoopsie
+<h1 align="center">
+**********************************Custom Marlin firmare made by Srg_Whoopsie**********************************
+****************************************************************************************************************************************
+**********************************Mainly for modified Biqu B1 and Voxelab Aquila X2**********************************
+****************************************************************************************************************************************
+**********************************all base credits to the marlin team for the base firmware.**********************************
+</h1>
 
-Mainly for modified Biqu B1 and Voxelab Aquila X2
 
-all base credits to the marlin team for the base firmware.
+## Branch Modifications
+
+__Changes to Configuration.h are:__ 
+TMC2209/TMC2226 Steppers
+Dual Z Steppers
+Tuned Hotend & Bed PID's __TUNED TO MY PRINTER__ 
+PID UI Menus
+BLTouch, Multiple Probing 3, Extra Probing 2, 15x15 UBL, Mesh Edit GFX Overlay
+UBL Mesh Wizard, Z Offset Wizard, Tramming Menus, 
+Nozzel Park 
+Z Safe Homing
+plus more tunings to my own machines.
+
+__Changes to Configuration adv.h are:__ 
+Config.ini Export
+Controller Fans
+Homing Bump, Homing Back Off Posts
+BLTouch Voltage, High Speed Mode, LCD Menu
+Z Stepper Auto Align, Assisted Trammin, Tramming Wizard, Probe Offset Wizard
+Turbo Back
+Scroll Status, Long File Name Scroll and Write/Host Support
+USB Flash Drive Suppport, USE OTG SUPPORT
+Onboard SD Connection
+Babystepping (always on, xy, without homing, display total, z probe ofset and gfx overlay)
+LinAdv (on but set to 0)
+Arc Support
+Upped Buffer Sizes
+Emergency Parser
+Advance Pause, Park Head On Pause
+Monitor TMC + TMC Debug
+StealthChop and Hybrid Threashold set
+Disabled SNAFU (driver safe power protect)
+Host ActionCommands
+Cancel Object
+plus more tunings to my own machines.
+
+__CAFE26:00 KITTY bootscreen.h__
+
+
+
+
+
+
+
 
 
 <p align="center"><img src="buildroot/share/pixmaps/logo/marlin-outrun-nf-500.png" height="250" alt="MarlinFirmware's logo" /></p>
