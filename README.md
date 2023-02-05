@@ -1,3 +1,10 @@
+Custom Marlin firmare made by Srg_Whoopsie
+
+Mainly for modified Biqu B1 and Voxelab Aquila X2
+
+all base credits to the marlin team for the base firmware.
+
+
 <p align="center"><img src="buildroot/share/pixmaps/logo/marlin-outrun-nf-500.png" height="250" alt="MarlinFirmware's logo" /></p>
 
 <h1 align="center">Marlin 3D Printer Firmware</h1>
