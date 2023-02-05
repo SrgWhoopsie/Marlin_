@@ -1,5 +1,5 @@
 <h1 align="center">
-*********************
+
     Custom Marlin firmare made by Srg_Whoopsie
     
     Mainly for modified Biqu B1 and Voxelab Aquila X2
