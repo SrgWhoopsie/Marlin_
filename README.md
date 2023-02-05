@@ -1,9 +1,11 @@
 <h1 align="center">
-*******Custom Marlin firmare made by Srg_Whoopsie*******
-********************************************************
-*******Mainly for modified Biqu B1 and Voxelab Aquila X2*******
-***************************************************************
-*******all base credits to the marlin team for the base firmware.*******
+*********************
+    Custom Marlin firmare made by Srg_Whoopsie
+    
+    Mainly for modified Biqu B1 and Voxelab Aquila X2
+    
+    all base credits to the marlin team for the base firmware.
+*********************
 </h1>
 
 
