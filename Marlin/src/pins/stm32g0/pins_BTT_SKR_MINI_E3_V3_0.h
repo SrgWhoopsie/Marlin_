@@ -64,11 +64,11 @@
 #define Z_MIN_PROBE_PIN                     PC14  // PROBE
 
 //
-// Filament Runout Sensor
+// Filament Runout Sensor            *Used as NEOPixel2 Output*   //Whoopsie
 //
-#ifndef FIL_RUNOUT_PIN
-  #define FIL_RUNOUT_PIN                    PC15  // E0-STOP
-#endif
+// #ifndef FIL_RUNOUT_PIN                                         //Whoopsie
+  // #define FIL_RUNOUT_PIN                    PC15  // E0-STOP   //Whoopsie
+// #endif                                                         //Whoopsie
 
 //
 // Power-loss Detection
@@ -136,9 +136,9 @@
 //
 #define HEATER_0_PIN                        PC8   // "HE"
 #define HEATER_BED_PIN                      PC9   // "HB"
-#define FAN_PIN                             PC6   // "FAN0"
-#define FAN1_PIN                            PC7   // "FAN1"
-#define FAN2_PIN                            PB15  // "FAN2"
+#define FAN_PIN                             PC6   // "FAN0" // Part Cooling Fan                       //Whoopsie
+#define FAN1_PIN                            PC7   // "FAN1" // Hotend Fan                             //Whoopsie
+#define FAN2_PIN                            PB15  // "FAN2" // Case Fans (Intake on cooler and Case Intake) //Whoopsie
 
 /**
  *              SKR Mini E3 V3.0
@@ -176,8 +176,8 @@
    * All pins are labeled as printed on DWIN PCB. Connect TX-TX, A-A and so on.
    */
 
-  #ifndef NO_CONTROLLER_CUSTOM_WIRING_WARNING
-    #error "CAUTION! DWIN_CREALITY_LCD requires a custom cable, see diagram above this line. (Define NO_CONTROLLER_CUSTOM_WIRING_WARNING to suppress this warning.)"
+  // #ifndef NO_CONTROLLER_CUSTOM_WIRING_WARNING
+    // #error "CAUTION! DWIN_CREALITY_LCD requires a custom cable, see diagram above this line. (Define NO_CONTROLLER_CUSTOM_WIRING_WARNING to suppress this warning.)"
   #endif
 
   #define BEEPER_PIN                 EXP1_02_PIN
@@ -185,7 +185,7 @@
   #define BTN_EN2                    EXP1_07_PIN
   #define BTN_ENC                    EXP1_01_PIN
 
-#elif HAS_WIRED_LCD
+// #elif HAS_WIRED_LCD
 
   #if ENABLED(SKR_MINI_SCREEN_ADAPTER)
     /** https://github.com/VoronDesign/Voron-Hardware/tree/master/SKR-Mini_Screen_Adaptor/SRK%20Mini%20E3%20V3.0
@@ -356,18 +356,18 @@
       #define LCD_BACKLIGHT_PIN             -1
 
     #else
-      #error "Only CR10_STOCKDISPLAY, ZONESTAR_LCD, ENDER2_STOCKDISPLAY, MKS_MINI_12864, FYSETC_MINI_12864_2_1, and TFTGLCD_PANEL_(SPI|I2C) are currently supported on the BIGTREE_SKR_MINI_E3."
+      // #error "Only CR10_STOCKDISPLAY, ZONESTAR_LCD, ENDER2_STOCKDISPLAY, MKS_MINI_12864, FYSETC_MINI_12864_2_1, and TFTGLCD_PANEL_(SPI|I2C) are currently supported on the BIGTREE_SKR_MINI_E3."
     #endif
 
   #endif // SKR_MINI_SCREEN_ADAPTER
 
-#endif // HAS_WIRED_LCD
+// #endif // HAS_WIRED_LCD
 
-#if BOTH(TOUCH_UI_FTDI_EVE, LCD_FYSETC_TFT81050)
+// #if BOTH(TOUCH_UI_FTDI_EVE, LCD_FYSETC_TFT81050)
 
-  #ifndef NO_CONTROLLER_CUSTOM_WIRING_WARNING
-    #error "CAUTION! LCD_FYSETC_TFT81050 requires wiring modifications. See 'pins_BTT_SKR_MINI_E3_common.h' for details. (Define NO_CONTROLLER_CUSTOM_WIRING_WARNING to suppress this warning.)"
-  #endif
+  // #ifndef NO_CONTROLLER_CUSTOM_WIRING_WARNING
+    // #error "CAUTION! LCD_FYSETC_TFT81050 requires wiring modifications. See 'pins_BTT_SKR_MINI_E3_common.h' for details. (Define NO_CONTROLLER_CUSTOM_WIRING_WARNING to suppress this warning.)"
+  // #endif
 
   /**
    * FYSETC TFT TFT81050 display pinout
@@ -404,7 +404,7 @@
 
   #define CLCD_MOD_RESET             EXP1_03_PIN
   #define CLCD_SPI_CS                EXP1_07_PIN
-#endif // TOUCH_UI_FTDI_EVE && LCD_FYSETC_TFT81050
+// #endif // TOUCH_UI_FTDI_EVE && LCD_FYSETC_TFT81050
 
 //
 // SD Support
@@ -434,8 +434,15 @@
 #define SD_MOSI_PIN                         PA7
 
 //
-// Default NEOPIXEL_PIN
+// Default NEOPIXEL_PIN   //Whoopsie
 //
 #ifndef NEOPIXEL_PIN
   #define NEOPIXEL_PIN                      PA8   // LED driving pin
 #endif
+//
+// Custom NEOPIXEL_PIN2   //Whoopsie
+//
+#ifndef NEOPIXEL2_PIN                                                  //Whoopsie
+  #define NEOPIXEL2_PIN                     PC15  // LED driving pin   //Whoopsie
+#endif
+
