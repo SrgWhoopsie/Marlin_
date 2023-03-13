@@ -101,7 +101,7 @@
  *
  * :[-1, 0, 1, 2, 3, 4, 5, 6, 7]
  */
-#define SERIAL_PORT -1                                                                 //Whoopsie
+#define SERIAL_PORT -1                                                                //Whoopsie
 
 /**
  * Serial Port Baud Rate
@@ -123,7 +123,7 @@
  * Currently Ethernet (-2) is only supported on Teensy 4.1 boards.
  * :[-2, -1, 0, 1, 2, 3, 4, 5, 6, 7]
  */
-//#define SERIAL_PORT_2 -1
+// #define SERIAL_PORT_2 1
 //#define BAUDRATE_2 250000   // :[2400, 9600, 19200, 38400, 57600, 115200, 250000, 500000, 1000000] Enable to override BAUDRATE
 
 /**
@@ -138,7 +138,7 @@
 //#define BLUETOOTH
 
 // Name displayed in the LCD "Ready" message and Info menu
-#define CUSTOM_MACHINE_NAME "SumitomoDriveTech"                                        //Whoopsie
+#define CUSTOM_MACHINE_NAME "Sumitomo"                                        //Whoopsie
 
 // Printer's unique ID, used by some programs to differentiate between machines.
 // Choose your own or use a service like https://www.uuidgenerator.net/version4
@@ -835,7 +835,7 @@
  * Note: For Bowden Extruders make this large enough to allow load/unload.
  */
 #define PREVENT_LENGTHY_EXTRUDE
-#define EXTRUDE_MAXLENGTH 1000                                                       //Whoopsie
+#define EXTRUDE_MAXLENGTH 2500                                                       //Whoopsie
 
 //===========================================================================
 //======================== Thermal Runaway Protection =======================
@@ -1226,14 +1226,14 @@
  * Override with M92
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 400, 93.96 }                        //Whoopsie
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 400, 93.94 }                        //Whoopsie
 
 /**
  * Default Max Feed Rate (linear=mm/s, rotational=°/s)
  * Override with M203
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_MAX_FEEDRATE          { 500, 500, 5, 25 }                           //Whoopsie   
+#define DEFAULT_MAX_FEEDRATE          { 750, 750, 10, 50 }                           //Whoopsie   
 
 //#define LIMITED_MAX_FR_EDITING        // Limit edit via M203 or LCD to DEFAULT_MAX_FEEDRATE * 2
 #if ENABLED(LIMITED_MAX_FR_EDITING)
@@ -1263,7 +1263,7 @@
  */
 #define DEFAULT_ACCELERATION                   500  // X, Y, Z ... and E acceleration for printing moves
 #define DEFAULT_RETRACT_ACCELERATION           500  // E acceleration for retracts
-#define DEFAULT_TRAVEL_ACCELERATION           8000  // X, Y, Z ... acceleration for travel (non printing) moves //Whoopsie
+#define DEFAULT_TRAVEL_ACCELERATION           5000  // X, Y, Z ... acceleration for travel (non printing) moves //Whoopsie
 #if ENABLED(AXIS4_ROTATES)
   #define DEFAULT_ANGULAR_ACCELERATION        3000  // I, J, K acceleration for rotational-only printing moves
   #define DEFAULT_ANGULAR_TRAVEL_ACCELERATION 3000  // I, J, K acceleration for rotational-only travel (non printing) moves
@@ -1545,7 +1545,7 @@
  *     |    [-]    |
  *     O-- FRONT --+
  */
-#define NOZZLE_TO_PROBE_OFFSET {-45.0, -7.0, 0}                                     //Whoopsie
+#define NOZZLE_TO_PROBE_OFFSET {-40.0, -13.0, 0}                                     //Whoopsie
 
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
@@ -1555,7 +1555,7 @@
 #define XY_PROBE_FEEDRATE (150*60)                                                  //Whoopsie
 
 // Feedrate (mm/min) for the first approach when double-probing (MULTIPLE_PROBING == 2)
-#define Z_PROBE_FEEDRATE_FAST (6*60)                                                //Whoopsie
+#define Z_PROBE_FEEDRATE_FAST (8*60)                                                //Whoopsie
 
 // Feedrate (mm/min) for the "accurate" probe of each point
 #define Z_PROBE_FEEDRATE_SLOW (Z_PROBE_FEEDRATE_FAST / 2)
@@ -1702,9 +1702,9 @@
 // @section motion
 
 // Invert the stepper direction. Change (or reverse the motor connector) if an axis goes the wrong way.
-#define INVERT_X_DIR false
-#define INVERT_Y_DIR false                                                                              //Whoopsie
-#define INVERT_Z_DIR true                                                                               //Whoopsie
+#define INVERT_X_DIR true                                                                              //Whoopsie
+#define INVERT_Y_DIR true                                                                              //Whoopsie
+#define INVERT_Z_DIR false                                                                               //Whoopsie
 //#define INVERT_I_DIR false
 //#define INVERT_J_DIR false
 //#define INVERT_K_DIR false
@@ -1715,7 +1715,7 @@
 // @section extruder
 
 // For direct drive extruder v9 set to true, for geared extruder set to false.
-#define INVERT_E0_DIR false
+#define INVERT_E0_DIR true
 #define INVERT_E1_DIR false
 #define INVERT_E2_DIR false
 #define INVERT_E3_DIR false
@@ -1763,9 +1763,9 @@
 #define X_MIN_POS 0
 #define Y_MIN_POS 0
 #define Z_MIN_POS 0
-#define X_MAX_POS 230                                                                                   //Whoopsie
-#define Y_MAX_POS 230                                                                                   //Whoopsie
-#define Z_MAX_POS 250                                                                                   //Whoopsie
+#define X_MAX_POS 227                                                                                   //Whoopsie
+#define Y_MAX_POS 245                                                                                   //Whoopsie
+#define Z_MAX_POS 253                                                                                   //Whoopsie
 //#define I_MIN_POS 0
 //#define I_MAX_POS 50
 //#define J_MIN_POS 0
@@ -1817,7 +1817,7 @@
 #endif
 
 #if EITHER(MIN_SOFTWARE_ENDSTOPS, MAX_SOFTWARE_ENDSTOPS)
-  //#define SOFT_ENDSTOPS_MENU_ITEM  // Enable/Disable software endstops from the LCD
+  #define SOFT_ENDSTOPS_MENU_ITEM  // Enable/Disable software endstops from the LCD
 #endif
 
 /**
@@ -1833,9 +1833,9 @@
  * RAMPS-based boards use SERVO3_PIN for the first runout sensor.
  * For other boards you may need to define FIL_RUNOUT_PIN, FIL_RUNOUT2_PIN, etc.
  */
-//#define FILAMENT_RUNOUT_SENSOR
+// #define FILAMENT_RUNOUT_SENSOR
 #if ENABLED(FILAMENT_RUNOUT_SENSOR)
-  #define FIL_RUNOUT_ENABLED_DEFAULT true // Enable the sensor on startup. Override with M412 followed by M500.
+  #define FIL_RUNOUT_ENABLED_DEFAULT false // Enable the sensor on startup. Override with M412 followed by M500.
   #define NUM_RUNOUT_SENSORS   1          // Number of sensors, up to one per extruder. Define a FIL_RUNOUT#_PIN for each.
 
   #define FIL_RUNOUT_STATE     LOW        // Pin state indicating that filament is NOT present.
@@ -2051,7 +2051,7 @@
   //========================= Unified Bed Leveling ============================
   //===========================================================================
 
-  // #define MESH_EDIT_GFX_OVERLAY   // Display a graphics overlay while editing the mesh                     //Whoopsie
+  #define MESH_EDIT_GFX_OVERLAY   // Display a graphics overlay while editing the mesh                     //WhoopsieA
 
   #define MESH_INSET 2              // Set Mesh bounds as an inset region of the bed                       //Whoopsie
   #define GRID_MAX_POINTS_X 15      // Don't use more than 15 points per axis, implementation limited.     //Whoopsie
@@ -3422,10 +3422,10 @@
   #define NEOPIXEL_PIN                PA8 // LED driving pin SKR E3V3.0 Defualt                       //Whoopsie
   #define NEOPIXEL2_TYPE  NEOPIXEL_TYPE                                                               //Whoopsie
   #define NEOPIXEL2_PIN               PC15                                                            //Whoopsie
-  #define NEOPIXEL_PIXELS              8 // Number of LEDs in the strip. (Longest strip when NEOPIXEL2_SEPARATE is disabled.)   //Whoopsie
+  #define NEOPIXEL_PIXELS              6  // Number of LEDs in the strip. (Longest strip when NEOPIXEL2_SEPARATE is disabled.)   //Whoopsie
   #define NEOPIXEL_IS_SEQUENTIAL          // Sequential display for temperature change - LED by LED. Disable to change all LEDs at once.
   #define NEOPIXEL_BRIGHTNESS         180 // Initial brightness (0-255)                               //Whoopsie
-  #define NEOPIXEL_STARTUP_TEST         // Cycle through colors at startup                            //Whoopsie
+  #define NEOPIXEL_STARTUP_TEST           // Cycle through colors at startup                          //Whoopsie
 
   // Support for second Adafruit NeoPixel LED driver controlled with M150 S1 ...
   #define NEOPIXEL2_SEPARATE  //Whoopsie

@@ -136,9 +136,9 @@
 //
 #define HEATER_0_PIN                        PC8   // "HE"
 #define HEATER_BED_PIN                      PC9   // "HB"
-#define FAN_PIN                             PC6   // "FAN0" // Part Cooling Fan                       //Whoopsie
-#define FAN1_PIN                            PC7   // "FAN1" // Hotend Fan                             //Whoopsie
-#define FAN2_PIN                            PB15  // "FAN2" // Case Fans (Intake on cooler and Case Intake) //Whoopsie
+#define FAN_PIN                             PC6   // "FAN0" // Part Cooler                   //Whoopsie
+#define FAN1_PIN                            PC7   // "FAN1" // Case and Chipset Fans                              //Whoopsie
+#define FAN2_PIN                            PB15  // "FAN2" // Hotend Cooler Fan                       //Whoopsie
 
 /**
  *              SKR Mini E3 V3.0
