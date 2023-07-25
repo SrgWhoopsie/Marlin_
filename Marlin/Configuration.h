@@ -756,9 +756,9 @@
 
   // 120V 250W silicone heater into 4mm borosilicate (MendelMax 1.5+)
   // from FOPDT model - kp=.39 Tp=405 Tdead=66, Tc set to 79.2, aggressive factor of .15 (vs .1, 1, 10)
-  #define DEFAULT_bedKp 50.00                                                           //Whoopsie
-  #define DEFAULT_bedKi 8.023                                                           //Whoopsie
-  #define DEFAULT_bedKd 185.4                                                           //Whoopsie
+  #define DEFAULT_bedKp 128                                                          //Whoopsie
+  #define DEFAULT_bedKi 24.59                                                          //Whoopsie
+  #define DEFAULT_bedKd 78.81                                                          //Whoopsie
 
   // FIND YOUR OWN: "M303 E-1 C8 S90" to run autotune on the bed at 90 degreesC for 8 cycles.
 #endif // PIDTEMPBED
@@ -1226,7 +1226,7 @@
  * Override with M92
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 400, 93.94 }                        //Whoopsie
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 400, 93.96 }                        //Whoopsie
 
 /**
  * Default Max Feed Rate (linear=mm/s, rotational=°/s)
@@ -1246,7 +1246,7 @@
  * Override with M201
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_MAX_ACCELERATION      { 1000, 1000, 100, 1000 }                     //Whoopsie
+#define DEFAULT_MAX_ACCELERATION      { 1500, 1500, 100, 1500 }                     //Whoopsie
 
 //#define LIMITED_MAX_ACCEL_EDITING     // Limit edit via M201 or LCD to DEFAULT_MAX_ACCELERATION * 2
 #if ENABLED(LIMITED_MAX_ACCEL_EDITING)
@@ -1261,9 +1261,9 @@
  *   M204 R    Retract Acceleration
  *   M204 T    Travel Acceleration
  */
-#define DEFAULT_ACCELERATION                   500  // X, Y, Z ... and E acceleration for printing moves
-#define DEFAULT_RETRACT_ACCELERATION           500  // E acceleration for retracts
-#define DEFAULT_TRAVEL_ACCELERATION           5000  // X, Y, Z ... acceleration for travel (non printing) moves //Whoopsie
+#define DEFAULT_ACCELERATION                  1000  // X, Y, Z ... and E acceleration for printing moves
+#define DEFAULT_RETRACT_ACCELERATION          1000  // E acceleration for retracts
+#define DEFAULT_TRAVEL_ACCELERATION           2500  // X, Y, Z ... acceleration for travel (non printing) moves //Whoopsie
 #if ENABLED(AXIS4_ROTATES)
   #define DEFAULT_ANGULAR_ACCELERATION        3000  // I, J, K acceleration for rotational-only printing moves
   #define DEFAULT_ANGULAR_TRAVEL_ACCELERATION 3000  // I, J, K acceleration for rotational-only travel (non printing) moves
@@ -1545,7 +1545,7 @@
  *     |    [-]    |
  *     O-- FRONT --+
  */
-#define NOZZLE_TO_PROBE_OFFSET {-40.0, -13.0, 0}                                     //Whoopsie
+#define NOZZLE_TO_PROBE_OFFSET {-3, -55, -3.4291}                                     //Whoopsie
 
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
@@ -1763,7 +1763,7 @@
 #define X_MIN_POS 0
 #define Y_MIN_POS 0
 #define Z_MIN_POS 0
-#define X_MAX_POS 227                                                                                   //Whoopsie
+#define X_MAX_POS 225                                                                                   //Whoopsie
 #define Y_MAX_POS 245                                                                                   //Whoopsie
 #define Z_MAX_POS 253                                                                                   //Whoopsie
 //#define I_MIN_POS 0
@@ -2641,7 +2641,7 @@
 // If you have a speaker that can produce tones, enable it here.
 // By default Marlin assumes you have a buzzer with a fixed frequency.
 //
-//#define SPEAKER
+#define SPEAKER
 
 //
 // The duration and frequency for the UI feedback sound.
@@ -2650,8 +2650,8 @@
 // Note: Test audio output with the G-Code:
 //  M300 S<frequency Hz> P<duration ms>
 //
-//#define LCD_FEEDBACK_FREQUENCY_DURATION_MS 2
-//#define LCD_FEEDBACK_FREQUENCY_HZ 5000
+#define LCD_FEEDBACK_FREQUENCY_DURATION_MS 2
+#define LCD_FEEDBACK_FREQUENCY_HZ 5000
 
 //=============================================================================
 //======================== LCD / Controller Selection =========================
