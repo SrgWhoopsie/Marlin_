@@ -1237,7 +1237,7 @@
  * Override with M203
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_MAX_FEEDRATE          { 750, 750, 10, 50 }                           //Whoopsie   
+#define DEFAULT_MAX_FEEDRATE          { 250, 250, 10, 50 }                           //Whoopsie   
 
 //#define LIMITED_MAX_FR_EDITING        // Limit edit via M203 or LCD to DEFAULT_MAX_FEEDRATE * 2
 #if ENABLED(LIMITED_MAX_FR_EDITING)
@@ -1627,8 +1627,8 @@
  * A total of 2 does fast/slow probes with a weighted average.
  * A total of 3 or more adds more slow probes, taking the average.
  */
-#define MULTIPLE_PROBING 3                                                                     //Whoopsie
-#define EXTRA_PROBING    2                                                                     //Whoopsie
+#define MULTIPLE_PROBING 2                                                                     //Whoopsie
+#define EXTRA_PROBING    1                                                                     //Whoopsie
 
 /**
  * Z probes require clearance when deploying, stowing, and moving between
@@ -1805,7 +1805,7 @@
 #define X_MIN_POS 0
 #define Y_MIN_POS 0
 #define Z_MIN_POS 0
-#define X_MAX_POS 225                                                                                   //Whoopsie
+#define X_MAX_POS 235                                                                                   //Whoopsie
 #define Y_MAX_POS 245                                                                                   //Whoopsie
 #define Z_MAX_POS 253                                                                                   //Whoopsie
 //#define I_MIN_POS 0
@@ -2132,8 +2132,8 @@
 
   #define MESH_EDIT_GFX_OVERLAY   // Display a graphics overlay while editing the mesh                     //WhoopsieA
 
-  #define MESH_INSET 2              // Set Mesh bounds as an inset region of the bed                       //Whoopsie
-  #define GRID_MAX_POINTS_X 15      // Don't use more than 15 points per axis, implementation limited.     //Whoopsie
+  #define MESH_INSET 5              // Set Mesh bounds as an inset region of the bed                       //Whoopsie
+  #define GRID_MAX_POINTS_X 11      // Don't use more than 15 points per axis, implementation limited.     //Whoopsie
   #define GRID_MAX_POINTS_Y GRID_MAX_POINTS_X
 
   #define UBL_HILBERT_CURVE       // Use Hilbert distribution for less travel when probing multiple points  //Whoopsie

@@ -437,9 +437,9 @@
 //
 // Default NEOPIXEL_PIN   //Whoopsie
 //
-#ifndef NEOPIXEL_PIN
-  #define NEOPIXEL_PIN                      PA8   // LED driving pin
-#endif
+// #ifndef NEOPIXEL_PIN
+  // #define NEOPIXEL_PIN                      PA8   // LED driving pin
+// #endif
 //
 // Custom NEOPIXEL_PIN2   //Whoopsie
 //
