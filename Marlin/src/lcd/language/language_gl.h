@@ -226,11 +226,8 @@ namespace LanguageNarrow_gl {
   LSTR MSG_MOVE_EN                        = _UxGT("Extrusor *");
   LSTR MSG_HOTEND_TOO_COLD                = _UxGT("Bico moi frío");
   LSTR MSG_MOVE_N_MM                      = _UxGT("Mover $mm");
-  LSTR MSG_MOVE_01MM                      = _UxGT("Mover 0.1mm");
-  LSTR MSG_MOVE_1MM                       = _UxGT("Mover 1mm");
-  LSTR MSG_MOVE_10MM                      = _UxGT("Mover 10mm");
-  LSTR MSG_MOVE_50MM                      = _UxGT("Mover 50mm");
-  LSTR MSG_MOVE_100MM                     = _UxGT("Mover 100mm");
+  LSTR MSG_MOVE_N_IN                      = _UxGT("Mover $in");
+  LSTR MSG_MOVE_N_DEG                     = _UxGT("Mover $") LCD_STR_DEGREE;
   LSTR MSG_SPEED                          = _UxGT("Velocidade");
   LSTR MSG_MESH_Z_OFFSET                  = _UxGT("Cama Z");
   LSTR MSG_NOZZLE                         = _UxGT("Bico");
@@ -422,11 +419,9 @@ namespace LanguageNarrow_gl {
   LSTR MSG_BABYSTEP_N                     = _UxGT("Micropaso @");
   LSTR MSG_BABYSTEP_TOTAL                 = _UxGT("Total");
   LSTR MSG_ENDSTOP_ABORT                  = _UxGT("Erro FinCarro");
-  LSTR MSG_HEATING_FAILED_LCD             = _UxGT("Fallo Quentando");
+  LSTR MSG_ERR_HEATING_FAILED             = _UxGT("Fallo Quentando");
   LSTR MSG_ERR_REDUNDANT_TEMP             = _UxGT("Erro:Temp Redundante");
-  LSTR MSG_THERMAL_RUNAWAY                = _UxGT("FUGA TÉRMICA");
-  LSTR MSG_THERMAL_RUNAWAY_BED            = _UxGT("FUGA TÉRMICA CAMA");
-  LSTR MSG_THERMAL_RUNAWAY_CHAMBER        = _UxGT("FUGA TÉRMICA CÁMARA");
+  LSTR MSG_ERR_THERMAL_RUNAWAY            = _UxGT("FUGA TÉRMICA");
   LSTR MSG_ERR_MAXTEMP                    = _UxGT("Erro:TEMP MÁX");
   LSTR MSG_ERR_MINTEMP                    = _UxGT("Erro:TEMP MÍN");
   LSTR MSG_HALTED                         = _UxGT("IMPRESORA DETIDA");
