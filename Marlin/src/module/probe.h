@@ -29,9 +29,12 @@
 
 #include "motion.h"
 
-#if ENABLED(DWIN_LCD_PROUI)
-  #include "../lcd/e3v2/proui/dwin.h"
+#if ENABLED(BLTOUCH)
+  #include "../feature/bltouch.h"
 #endif
+
+#define DEBUG_OUT ENABLED(DEBUG_LEVELING_FEATURE)
+#include "../core/debug_out.h"
 
 #if HAS_BED_PROBE
   enum ProbePtRaise : uint8_t {
@@ -42,24 +45,22 @@
   };
 #endif
 
-#if USES_Z_MIN_PROBE_PIN
-  #define PROBE_TRIGGERED() (READ(Z_MIN_PROBE_PIN) == Z_MIN_PROBE_ENDSTOP_HIT_STATE)
+#if ENABLED(BD_SENSOR)
+  #define PROBE_READ() bdp_state
+#elif USE_Z_MIN_PROBE
+  #define PROBE_READ() READ(Z_MIN_PROBE_PIN)
 #else
-  #define PROBE_TRIGGERED() (READ(Z_MIN_PIN) == Z_MIN_ENDSTOP_HIT_STATE)
+  #define PROBE_READ() READ(Z_MIN_PIN)
 #endif
-
-#if ALL(DWIN_LCD_PROUI, INDIVIDUAL_AXIS_HOMING_SUBMENU, MESH_BED_LEVELING)
-  #define Z_POST_CLEARANCE HMI_data.z_after_homing
-#elif defined(Z_AFTER_HOMING)
-  #define Z_POST_CLEARANCE Z_AFTER_HOMING
-#elif defined(Z_HOMING_HEIGHT)
-  #define Z_POST_CLEARANCE Z_HOMING_HEIGHT
+#if USE_Z_MIN_PROBE
+  #define PROBE_HIT_STATE Z_MIN_PROBE_ENDSTOP_HIT_STATE
 #else
-  #define Z_POST_CLEARANCE 10
+  #define PROBE_HIT_STATE Z_MIN_ENDSTOP_HIT_STATE
 #endif
+#define PROBE_TRIGGERED() (PROBE_READ() == PROBE_HIT_STATE)
 
 // In BLTOUCH HS mode, the probe travels in a deployed state.
-#define Z_PROBE_SAFE_CLEARANCE SUM_TERN(BLTOUCH, Z_CLEARANCE_BETWEEN_PROBES, bltouch.z_extra_clearance())
+#define Z_TWEEN_SAFE_CLEARANCE SUM_TERN(BLTOUCH, Z_CLEARANCE_BETWEEN_PROBES, bltouch.z_extra_clearance())
 
 #if ENABLED(PREHEAT_BEFORE_LEVELING)
   #ifndef LEVELING_NOZZLE_TEMP
@@ -86,8 +87,8 @@ public:
 
     static xyz_pos_t offset;
 
-    #if EITHER(PREHEAT_BEFORE_PROBING, PREHEAT_BEFORE_LEVELING)
-      static void preheat_for_probing(const celsius_t hotend_temp, const celsius_t bed_temp);
+    #if ANY(PREHEAT_BEFORE_PROBING, PREHEAT_BEFORE_LEVELING)
+      static void preheat_for_probing(const celsius_t hotend_temp, const celsius_t bed_temp, const bool early=false);
     #endif
 
     static void probe_error_stop();
@@ -170,14 +171,17 @@ public:
 
     #endif // !IS_KINEMATIC
 
-    static void move_z_after_probing() {
-      #ifdef Z_AFTER_PROBING
-        do_z_clearance(Z_AFTER_PROBING, true); // Move down still permitted
-      #endif
-    }
-    static float probe_at_point(const_float_t rx, const_float_t ry, const ProbePtRaise raise_after=PROBE_PT_NONE, const uint8_t verbose_level=0, const bool probe_relative=true, const bool sanity_check=true);
-    static float probe_at_point(const xy_pos_t &pos, const ProbePtRaise raise_after=PROBE_PT_NONE, const uint8_t verbose_level=0, const bool probe_relative=true, const bool sanity_check=true) {
-      return probe_at_point(pos.x, pos.y, raise_after, verbose_level, probe_relative, sanity_check);
+    static float probe_at_point(const_float_t rx, const_float_t ry, const ProbePtRaise raise_after=PROBE_PT_NONE,
+      const uint8_t verbose_level=0, const bool probe_relative=true, const bool sanity_check=true,
+      const_float_t z_min_point=Z_PROBE_LOW_POINT, const_float_t z_clearance=Z_TWEEN_SAFE_CLEARANCE,
+      const bool raise_after_is_relative=false);
+
+    static float probe_at_point(const xy_pos_t &pos, const ProbePtRaise raise_after=PROBE_PT_NONE,
+      const uint8_t verbose_level=0, const bool probe_relative=true, const bool sanity_check=true,
+      const_float_t z_min_point=Z_PROBE_LOW_POINT, float z_clearance=Z_TWEEN_SAFE_CLEARANCE,
+      const bool raise_after_is_relative=false
+    ) {
+      return probe_at_point(pos.x, pos.y, raise_after, verbose_level, probe_relative, sanity_check, z_min_point, z_clearance, raise_after_is_relative);
     }
 
   #else // !HAS_BED_PROBE
@@ -186,17 +190,16 @@ public:
 
     static bool set_deployed(const bool, const bool=false) { return false; }
 
-    static bool can_reach(const_float_t rx, const_float_t ry, const bool=true) { return position_is_reachable(rx, ry); }
+    static bool can_reach(const_float_t rx, const_float_t ry, const bool=true) { return position_is_reachable(TERN_(HAS_X_AXIS, rx) OPTARG(HAS_Y_AXIS, ry)); }
 
   #endif // !HAS_BED_PROBE
 
   static void use_probing_tool(const bool=true) IF_DISABLED(DO_TOOLCHANGE_FOR_PROBING, {});
 
-  static void move_z_after_homing() {
-    #if ALL(DWIN_LCD_PROUI, INDIVIDUAL_AXIS_HOMING_SUBMENU, MESH_BED_LEVELING) || defined(Z_AFTER_HOMING)
-      do_z_clearance(Z_POST_CLEARANCE, true);
-    #elif HAS_BED_PROBE
-      move_z_after_probing();
+  static void move_z_after_probing() {
+    DEBUG_SECTION(mzah, "move_z_after_probing", DEBUGGING(LEVELING));
+    #ifdef Z_AFTER_PROBING
+      do_z_clearance(Z_AFTER_PROBING, true, true); // Move down still permitted
     #endif
   }
 
@@ -239,30 +242,37 @@ public:
      * close it can get the RIGHT edge of the bed (unless the nozzle is able move
      * far enough past the right edge).
      */
-    static constexpr float _min_x(const xy_pos_t &probe_offset_xy=offset_xy) {
-      return TERN(IS_KINEMATIC,
-        (X_CENTER) - probe_radius(probe_offset_xy),
-        _MAX((X_MIN_BED) + (PROBING_MARGIN_LEFT), (X_MIN_POS) + probe_offset_xy.x)
-      );
-    }
-    static constexpr float _max_x(const xy_pos_t &probe_offset_xy=offset_xy) {
-      return TERN(IS_KINEMATIC,
-        (X_CENTER) + probe_radius(probe_offset_xy),
-        _MIN((X_MAX_BED) - (PROBING_MARGIN_RIGHT), (X_MAX_POS) + probe_offset_xy.x)
-      );
-    }
-    static constexpr float _min_y(const xy_pos_t &probe_offset_xy=offset_xy) {
-      return TERN(IS_KINEMATIC,
-        (Y_CENTER) - probe_radius(probe_offset_xy),
-        _MAX((Y_MIN_BED) + (PROBING_MARGIN_FRONT), (Y_MIN_POS) + probe_offset_xy.y)
-      );
-    }
-    static constexpr float _max_y(const xy_pos_t &probe_offset_xy=offset_xy) {
-      return TERN(IS_KINEMATIC,
-        (Y_CENTER) + probe_radius(probe_offset_xy),
-        _MIN((Y_MAX_BED) - (PROBING_MARGIN_BACK), (Y_MAX_POS) + probe_offset_xy.y)
-      );
-    }
+    #if PROUI_EX
+      static float _min_x(const xy_pos_t &probe_offset_xy = TERN(HAS_BED_PROBE,offset_xy,{0}));
+      static float _max_x(const xy_pos_t &probe_offset_xy = TERN(HAS_BED_PROBE,offset_xy,{0}));
+      static float _min_y(const xy_pos_t &probe_offset_xy = TERN(HAS_BED_PROBE,offset_xy,{0}));
+      static float _max_y(const xy_pos_t &probe_offset_xy = TERN(HAS_BED_PROBE,offset_xy,{0}));
+    #else
+      static constexpr float _min_x(const xy_pos_t &probe_offset_xy = offset_xy) {
+        return TERN(IS_KINEMATIC,
+          (X_CENTER) - probe_radius(probe_offset_xy),
+          _MAX((X_MIN_BED) + (PROBING_MARGIN_LEFT), (X_MIN_POS) + probe_offset_xy.x)
+        );
+      }
+      static constexpr float _max_x(const xy_pos_t &probe_offset_xy = offset_xy) {
+        return TERN(IS_KINEMATIC,
+          (X_CENTER) + probe_radius(probe_offset_xy),
+          _MIN((X_MAX_BED) - (PROBING_MARGIN_RIGHT), (X_MAX_POS) + probe_offset_xy.x)
+        );
+      }
+      static constexpr float _min_y(const xy_pos_t &probe_offset_xy = offset_xy) {
+        return TERN(IS_KINEMATIC,
+          (Y_CENTER) - probe_radius(probe_offset_xy),
+          _MAX((Y_MIN_BED) + (PROBING_MARGIN_FRONT), (Y_MIN_POS) + probe_offset_xy.y)
+        );
+      }
+      static constexpr float _max_y(const xy_pos_t &probe_offset_xy = offset_xy) {
+        return TERN(IS_KINEMATIC,
+          (Y_CENTER) + probe_radius(probe_offset_xy),
+          _MIN((Y_MAX_BED) - (PROBING_MARGIN_BACK), (Y_MAX_POS) + probe_offset_xy.y)
+        );
+      }
+    #endif
 
     static float min_x() { return _min_x() TERN_(NOZZLE_AS_PROBE, TERN_(HAS_HOME_OFFSET, - home_offset.x)); }
     static float max_x() { return _max_x() TERN_(NOZZLE_AS_PROBE, TERN_(HAS_HOME_OFFSET, - home_offset.x)); }
@@ -281,7 +291,7 @@ public:
       static constexpr xy_pos_t default_probe_xy_offset = xy_pos_t({ default_probe_xyz_offset.x,  default_probe_xyz_offset.y });
 
     public:
-      static constexpr bool can_reach(float x, float y) {
+      TERN(PROUI_EX, static, static constexpr) bool can_reach(float x, float y) {
         #if IS_KINEMATIC
           return HYPOT2(x, y) <= sq(probe_radius(default_probe_xy_offset));
         #else
@@ -290,7 +300,7 @@ public:
         #endif
       }
 
-      static constexpr bool can_reach(const xy_pos_t &point) { return can_reach(point.x, point.y); }
+      TERN(PROUI_EX, static, static constexpr) bool can_reach(const xy_pos_t &point) { return can_reach(point.x, point.y); }
     };
 
     #if NEEDS_THREE_PROBE_POINTS
@@ -311,7 +321,7 @@ public:
             points[0] = xy_float_t({ (X_CENTER) + probe_radius() * COS0,   (Y_CENTER) + probe_radius() * SIN0 });
             points[1] = xy_float_t({ (X_CENTER) + probe_radius() * COS120, (Y_CENTER) + probe_radius() * SIN120 });
             points[2] = xy_float_t({ (X_CENTER) + probe_radius() * COS240, (Y_CENTER) + probe_radius() * SIN240 });
-          #elif ENABLED(AUTO_BED_LEVELING_UBL)
+          #elif ENABLED(AUTO_BED_LEVELING_UBL) && DISABLED(PROUI_EX)
             points[0] = xy_float_t({ _MAX(float(MESH_MIN_X), min_x()), _MAX(float(MESH_MIN_Y), min_y()) });
             points[1] = xy_float_t({ _MIN(float(MESH_MAX_X), max_x()), _MAX(float(MESH_MIN_Y), min_y()) });
             points[2] = xy_float_t({ (_MAX(float(MESH_MIN_X), min_x()) + _MIN(float(MESH_MAX_X), max_x())) / 2, _MIN(float(MESH_MAX_Y), max_y()) });
@@ -347,8 +357,7 @@ public:
 
 private:
   static bool probe_down_to_z(const_float_t z, const_feedRate_t fr_mm_s);
-  static void do_z_raise(const float z_raise);
-  static float run_z_probe(const bool sanity_check=true);
+  static float run_z_probe(const bool sanity_check=true, const_float_t z_min_point=Z_PROBE_LOW_POINT, const_float_t z_clearance=Z_TWEEN_SAFE_CLEARANCE);
 };
 
 extern Probe probe;

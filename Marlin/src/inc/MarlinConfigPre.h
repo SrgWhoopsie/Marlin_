@@ -49,7 +49,7 @@
 #include "Conditionals_LCD.h"
 
 #ifndef __MARLIN_DEPS__
-  #include HAL_PATH(../HAL, inc/Conditionals_LCD.h)
+  #include HAL_PATH(.., inc/Conditionals_LCD.h)
 #endif
 
 #include "../core/drivers.h"
@@ -58,5 +58,10 @@
 #include "Conditionals_adv.h"
 
 #ifndef __MARLIN_DEPS__
-  #include HAL_PATH(../HAL, inc/Conditionals_adv.h)
+  #include HAL_PATH(.., inc/Conditionals_adv.h)
+#endif
+
+// DWIN general ProUI defines and data structs
+#if ENABLED(DWIN_LCD_PROUI)
+  #include "../lcd/e3v2/proui/dwin_defines.h"
 #endif

@@ -1,13 +1,12 @@
 /**
- * Marlin 3D Printer Firmware
- * Copyright (c) 2021 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
- *
- * Based on Sprinter and grbl.
- * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
+ * DWIN Enhanced implementation for PRO UI
+ * Author: Miguel A. Risco-Castillo (MRISCOC)
+ * Version: 3.25.3
+ * Date: 2023/05/18
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,41 +14,41 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
 #pragma once
-
-/**
- * DWIN Enhanced implementation for PRO UI
- * Author: Miguel A. Risco-Castillo (MRISCOC)
- * Version: 3.21.2
- * Date: 2022/12/02
- */
 
 #include "../../../inc/MarlinConfig.h"
 
 #include "dwin_defines.h"
 #include "dwinui.h"
 #include "../common/encoder.h"
+#include "../common/limits.h"
 #include "../../../libs/BL24CXX.h"
+#if ENABLED(LED_CONTROL_MENU)
+  #include "../../../feature/leds/leds.h"
+#endif
 
-#if EITHER(BABYSTEPPING, HAS_BED_PROBE)
-  #define HAS_ZOFFSET_ITEM 1
-  #if !HAS_BED_PROBE
-    #define JUST_BABYSTEP 1
-  #endif
+#if HAS_CGCODE
+  #include "custom_gcodes.h"
+#endif
+
+#if ENABLED(CV_LASER_MODULE)
+  #include "cv_laser_module.h"
 #endif
 
 namespace GET_LANG(LCD_LANGUAGE) {
   #define _MSG_PREHEAT(N) \
     LSTR MSG_PREHEAT_##N                  = _UxGT("Preheat ") PREHEAT_## N ##_LABEL; \
-    LSTR MSG_PREHEAT_## N ##_SETTINGS     = _UxGT("Preheat ") PREHEAT_## N ##_LABEL _UxGT(" Conf");
+    LSTR MSG_PREHEAT_## N ##_SETTINGS     = _UxGT("Preheat ") PREHEAT_## N ##_LABEL _UxGT(" Settings");
   #if PREHEAT_COUNT > 3
-    REPEAT_S(4, PREHEAT_COUNT, _MSG_PREHEAT)
+    REPEAT_S(4, INCREMENT(PREHEAT_COUNT), _MSG_PREHEAT)
   #endif
 }
+
+extern char DateTime[16+1];
 
 enum processID : uint8_t {
   // Process ID
@@ -70,36 +69,33 @@ enum processID : uint8_t {
   WaitResponse,
   Homing,
   PidProcess,
+  PlotProcess,
   MPCProcess,
   NothingToDo
 };
 
-#if EITHER(DWIN_PID_TUNE, MPC_AUTOTUNE)
-
+#if ANY(PROUI_PID_TUNE, MPC_AUTOTUNE)
   enum tempcontrol_t : uint8_t {
-    #if DWIN_PID_TUNE
-      PID_DONE,
-      PIDTEMP_START,
-      PIDTEMPBED_START,
+    #if PROUI_PID_TUNE
+      PID_EXTR_START,
+      PID_BED_START,
       PID_BAD_HEATER_ID,
       PID_TEMP_TOO_HIGH,
       PID_TUNING_TIMEOUT,
     #endif
     #if ENABLED(MPC_AUTOTUNE)
-      MPC_DONE,
       MPCTEMP_START,
       MPC_TEMP_ERROR,
-      MPC_INTERRUPTED
+      MPC_INTERRUPTED,
     #endif
+    AUTOTUNE_DONE
   };
-
 #endif
 
 #define DWIN_CHINESE 123
 #define DWIN_ENGLISH 0
 
 typedef struct {
-  // Color settings
   uint16_t Background_Color;
   uint16_t Cursor_Color;
   uint16_t TitleBg_Color;
@@ -118,69 +114,70 @@ typedef struct {
   uint16_t Barfill_Color;
   uint16_t Indicator_Color;
   uint16_t Coordinate_Color;
-
-  // Temperatures
-  #if DWIN_PID_TUNE
-    int16_t PidCycles = DEF_PIDCYCLES;
-    #if ENABLED(PIDTEMP)
-      int16_t HotendPidT = DEF_HOTENDPIDT;
-    #endif
-    #if ENABLED(PIDTEMPBED)
-      int16_t BedPidT = DEF_BEDPIDT;
-    #endif
-  #endif
-  #if ENABLED(PREVENT_COLD_EXTRUSION)
-    int16_t ExtMinT = EXTRUDE_MINTEMP;
-  #endif
-  #if ENABLED(PREHEAT_BEFORE_LEVELING)
-    int16_t BedLevT = LEVELING_BED_TEMP;
-  #endif
-  #if ENABLED(BAUD_RATE_GCODE)
-    bool Baud115K = false;
-  #endif
-
-  bool FullManualTramming = false;
-  bool MediaAutoMount = ENABLED(HAS_SD_EXTENDER);
-  #if BOTH(INDIVIDUAL_AXIS_HOMING_SUBMENU, MESH_BED_LEVELING)
-    uint8_t z_after_homing = DEF_Z_AFTER_HOMING;
-  #endif
-  #if BOTH(LED_CONTROL_MENU, HAS_COLOR_LEDS)
-    LEDColor Led_Color = Def_Leds_Color;
-  #endif
+  uint16_t Bottom_Color;
+  int16_t HotendPidT;
+  int16_t BedPidT;
+  int16_t PidCycles;
+  int16_t ExtMinT;
+  int16_t BedLevT;
+  bool Baud250K;
+  bool CalcAvg;
+  bool SpdInd;
+  bool FullManualTramming;
+  bool MediaSort;
+  bool MediaAutoMount;
+  uint8_t z_after_homing;
+  float ManualZOffset;
+  uint32_t Led_Color;
+  bool AdaptiveStepSmoothing;
+  bool EnablePreview;
 } HMI_data_t;
 
 extern HMI_data_t HMI_data;
-static constexpr size_t eeprom_data_size = sizeof(HMI_data_t);
+static constexpr size_t eeprom_data_size = sizeof(HMI_data_t) + TERN0(PROUI_EX, sizeof(PRO_data_t));
 
 typedef struct {
-  int8_t Color[3];                    // Color components
-  #if DWIN_PID_TUNE
-    tempcontrol_t pidresult = PID_DONE;
+  int8_t r, g, b;
+  void set(int8_t _r, int8_t _g, int8_t _b) { r = _r; g = _g; b = _b; }
+  int8_t& operator[](const int i) {
+    switch (i) {
+      default:
+      case 0: return r;
+      case 1: return g;
+      case 2: return b;
+    }
+  }
+} rgb_t;
+
+typedef struct {
+  rgb_t Color;                        // Color
+  #if ANY(PROUI_PID_TUNE, MPCTEMP)
+    tempcontrol_t tempControl = AUTOTUNE_DONE;
   #endif
-  uint8_t Select          = 0;        // Auxiliary selector variable
-  AxisEnum axis           = X_AXIS;   // Axis Select
+  uint8_t Select = 0;                 // Auxiliary selector variable
+  AxisEnum axis = X_AXIS;             // Axis Select
 } HMI_value_t;
 
+extern HMI_value_t HMI_value;
+
 typedef struct {
-  uint8_t language;
   bool printing_flag:1; // sd or host printing
   bool abort_flag:1;    // sd or host was aborted
   bool pause_flag:1;    // printing is paused
-  bool percent_flag:1;  // percent was override by M73
-  bool remain_flag:1;   // remain was override by M73
   bool select_flag:1;   // Popup button selected
   bool home_flag:1;     // homing in course
-  bool heat_flag:1;     // 0: heating done  1: during heating
+  bool config_flag:1;   // SD G-code file is a Configuration file
+  #if PROUI_EX && HAS_LEVELING
+    bool cancel_abl:1;  // cancel current abl
+  #endif
 } HMI_flag_t;
 
-extern HMI_value_t HMI_value;
 extern HMI_flag_t HMI_flag;
 extern uint8_t checkkey;
-extern millis_t dwin_heat_time;
 
 // Popups
 #if HAS_HOTEND || HAS_HEATED_BED
-  void DWIN_Popup_Temperature(const bool toohigh);
+  void DWIN_Popup_Temperature(const int_fast8_t heater_id, const bool toohigh);
 #endif
 #if ENABLED(POWER_LOSS_RECOVERY)
   void Popup_PowerLossRecovery();
@@ -196,23 +193,30 @@ uint32_t GetHash(char * str);
     void SaveMesh();
   #endif
 #endif
+void dwinDrawPlot(tempcontrol_t result);
+void AutoLev();
 void RebootPrinter();
 void DisableMotors();
-void AutoLev();
+void AutoLevStart();
 void AutoHome();
+void AutoLevStart();
+void SetMeshPoints();
+void SetMeshInset();
+void MaxMeshArea();
+void CenterMeshArea();
+void SetMeshFadeHeight();
+void SetEncRateA();
+void SetEncRateB();
+void SetHSMode();
+void PopUp_StartAutoLev();
+void onClick_StartAutoLev();
+void SetRetractSpeed();
 #if HAS_PREHEAT
   #define _DOPREHEAT(N) void DoPreheat##N();
   REPEAT_1(PREHEAT_COUNT, _DOPREHEAT)
 #endif
 void DoCoolDown();
-#if ENABLED(PIDTEMP)
-  void HotendPID();
-#endif
-#if ENABLED(PIDTEMPBED)
-  void BedPID();
-#endif
 #if ENABLED(BAUD_RATE_GCODE)
-  void HMI_SetBaudRate();
   void SetBaud115K();
   void SetBaud250K();
 #endif
@@ -221,10 +225,15 @@ void DoCoolDown();
 #endif
 void ApplyExtMinT();
 void ParkHead();
-#if HAS_ONESTEP_LEVELING
+void RaiseHead();
+TERN(HAS_BED_PROBE, float, void) tram(uint8_t point, bool stow_probe = true);
+#if HAS_BED_PROBE && ENABLED(TRAMWIZ_MENU_ITEM)
   void Trammingwizard();
+  void TramwizStart();
+  void onClick_StartTramwiz();
+  void PopUp_StartTramwiz();
 #endif
-#if BOTH(LED_CONTROL_MENU, HAS_COLOR_LEDS)
+#if ALL(LED_CONTROL_MENU, HAS_COLOR_LEDS)
   void ApplyLEDColor();
 #endif
 #if ENABLED(AUTO_BED_LEVELING_UBL)
@@ -235,7 +244,7 @@ void ParkHead();
 #if ENABLED(HOST_SHUTDOWN_MENU_ITEM) && defined(SHUTDOWN_ACTION)
   void HostShutDown();
 #endif
-#if !HAS_BED_PROBE
+#if DISABLED(HAS_BED_PROBE)
   void HomeZandDisable();
 #endif
 
@@ -245,13 +254,12 @@ void Goto_Main_Menu();
 void Goto_Info_Menu();
 void Goto_PowerLossRecovery();
 void Goto_ConfirmToPrint();
-void DWIN_Draw_Dashboard(const bool with_update); // Status Area
 void Draw_Main_Area();      // Redraw main area
+void DWIN_Draw_Dashboard(); // Status Area
 void DWIN_DrawStatusLine(const char *text = ""); // Draw simple status text
 void DWIN_RedrawDash();     // Redraw Dash and Status line
 void DWIN_RedrawScreen();   // Redraw all screen elements
 void HMI_MainMenu();        // Main process screen
-void HMI_SelectFile();      // File page
 void HMI_Printing();        // Print page
 void HMI_ReturnScreen();    // Return to previous screen before popups
 void HMI_WaitForUser();
@@ -274,23 +282,18 @@ void DWIN_Print_Pause();
 void DWIN_Print_Resume();
 void DWIN_Print_Finished();
 void DWIN_Print_Aborted();
-#if HAS_FILAMENT_SENSOR
-  void DWIN_FilamentRunout(const uint8_t extruder);
-#endif
-void DWIN_M73();
 void DWIN_Print_Header(const char *text);
 void DWIN_SetColorDefaults();
-void DWIN_ApplyColor();
 void DWIN_CopySettingsTo(char * const buff);
 void DWIN_CopySettingsFrom(const char * const buff);
 void DWIN_SetDataDefaults();
 void DWIN_RebootScreen();
+inline void DWIN_Gcode(const int16_t codenum) { TERN_(HAS_CGCODE, custom_gcode(codenum)); }
 
 #if ENABLED(ADVANCED_PAUSE_FEATURE)
   void DWIN_Popup_Pause(FSTR_P const fmsg, uint8_t button=0);
   void Draw_Popup_FilamentPurge();
   void Goto_FilamentPurge();
-  void HMI_FilamentPurge();
 #endif
 
 // Utility and extensions
@@ -299,22 +302,17 @@ void DWIN_RebootScreen();
   void DWIN_UnLockScreen();
   void HMI_LockScreen();
 #endif
-#if HAS_MESH
+#if HAS_MESH && USE_GRID_MESHVIEWER
   void DWIN_MeshViewer();
-#endif
-#if HAS_GCODE_PREVIEW
-  void HMI_ConfirmToPrint();
 #endif
 #if HAS_ESDIAG
   void Draw_EndStopDiag();
-#endif
-#if ENABLED(PRINTCOUNTER)
-  void Draw_PrintStats();
 #endif
 
 // Menu drawing functions
 void Draw_Print_File_Menu();
 void Draw_Control_Menu();
+void Draw_Advanced_Menu();
 void Draw_AdvancedSettings_Menu();
 void Draw_Prepare_Menu();
 void Draw_Move_Menu();
@@ -330,9 +328,7 @@ void Draw_FilSet_Menu();
   void Draw_ParkPos_Menu();
 #endif
 void Draw_PhySet_Menu();
-void Draw_SelectColors_Menu();
-void Draw_GetColor_Menu();
-#if BOTH(CASE_LIGHT_MENU, CASELIGHT_USES_BRIGHTNESS)
+#if ALL(CASE_LIGHT_MENU, CASELIGHT_USES_BRIGHTNESS)
   void Draw_CaseLight_Menu();
 #endif
 #if ENABLED(LED_CONTROL_MENU)
@@ -341,11 +337,9 @@ void Draw_GetColor_Menu();
 void Draw_Tune_Menu();
 void Draw_Motion_Menu();
 #if ENABLED(ADVANCED_PAUSE_FEATURE)
-  void Draw_FilamentMan_Menu();
+  void ChangeFilament();
 #endif
-#if ENABLED(MESH_BED_LEVELING)
-  void Draw_ManualMesh_Menu();
-#endif
+void Draw_FilamentMan_Menu();
 void Draw_Temperature_Menu();
 void Draw_MaxSpeed_Menu();
 void Draw_MaxAccel_Menu();
@@ -353,7 +347,7 @@ void Draw_MaxAccel_Menu();
   void Draw_MaxJerk_Menu();
 #endif
 void Draw_Steps_Menu();
-#if EITHER(HAS_BED_PROBE, BABYSTEPPING)
+#if ANY(HAS_BED_PROBE, BABYSTEPPING)
   void Draw_ZOffsetWiz_Menu();
 #endif
 #if ENABLED(INDIVIDUAL_AXIS_HOMING_SUBMENU)
@@ -364,28 +358,69 @@ void Draw_Steps_Menu();
 #endif
 #if HAS_MESH
   void Draw_MeshSet_Menu();
+  void Draw_MeshInset_Menu();
   #if ENABLED(MESH_EDIT_MENU)
     void Draw_EditMesh_Menu();
   #endif
 #endif
+#if HAS_TRINAMIC_CONFIG
+  void Draw_TrinamicConfig_menu();
+#endif
+
+// Custom colors editing
+#if HAS_CUSTOM_COLORS
+  void DWIN_ApplyColor();
+  void DWIN_ApplyColor(const int8_t element, const bool ldef=false);
+  void Draw_SelectColors_Menu();
+  void Draw_GetColor_Menu();
+#endif
 
 // PID
-#if DWIN_PID_TUNE
+#if HAS_PID_HEATING //#if PROUI_PID_TUNE
   #include "../../../module/temperature.h"
-  void DWIN_StartM303(const bool seenC, const int c, const bool seenS, const heater_id_t hid, const celsius_t temp);
+  void DWIN_M303(const bool seenC, const int c, const bool seenS, const heater_id_t hid, const celsius_t temp);
   void DWIN_PidTuning(tempcontrol_t result);
-  #if ENABLED(PIDTEMP)
+  void Draw_PID_Menu();
+#endif
+#if ENABLED(PIDTEMP)
+  #if ENABLED(PID_AUTOTUNE_MENU)
+    void HotendPID();
+  #endif
+  #if ANY(PID_AUTOTUNE_MENU, PID_EDIT_MENU)
     void Draw_HotendPID_Menu();
   #endif
-  #if ENABLED(PIDTEMPBED)
+#endif
+#if ENABLED(PIDTEMPBED)
+  #if ENABLED(PID_AUTOTUNE_MENU)
+    void BedPID();
+  #endif
+  #if ANY(PID_AUTOTUNE_MENU, PID_EDIT_MENU)
     void Draw_BedPID_Menu();
   #endif
 #endif
 
 // MPC
-#if EITHER(MPC_EDIT_MENU, MPC_AUTOTUNE_MENU)
+#if ANY(MPC_EDIT_MENU, MPC_AUTOTUNE_MENU)
   void Draw_HotendMPC_Menu();
 #endif
 #if ENABLED(MPC_AUTOTUNE)
   void DWIN_MPCTuning(tempcontrol_t result);
+#endif
+
+// CV Laser Module
+#if ENABLED(CV_LASER_MODULE)
+  void LaserOn(const bool turn_on);
+  void Draw_LaserSettings_Menu();
+  void Draw_LaserPrint_Menu();
+#endif
+
+// ToolBar
+#if HAS_TOOLBAR
+  void Draw_TBSetup_Menu();
+  void Goto_ToolBar();
+  void Exit_ToolBar();
+#endif
+
+#if DEBUG_DWIN
+  void DWIN_Debug(const char *msg);
 #endif

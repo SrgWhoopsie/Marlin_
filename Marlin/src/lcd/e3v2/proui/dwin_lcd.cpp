@@ -1,13 +1,12 @@
 /**
- * Marlin 3D Printer Firmware
- * Copyright (c) 2021 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
- *
- * Based on Sprinter and grbl.
- * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
+ * DWIN Enhanced implementation for PRO UI
+ * Author: Miguel A. Risco-Castillo (MRISCOC)
+ * Version: 3.12.1
+ * Date: 2023/01/22
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,16 +14,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
- */
-
-/**
- * DWIN Enhanced implementation for PRO UI
- * Author: Miguel A. Risco-Castillo (MRISCOC)
- * Version: 3.10.1
- * Date: 2022/03/06
  */
 
 #include "../../../inc/MarlinConfigPre.h"
@@ -50,14 +42,6 @@ void DWIN_Draw_QR(uint8_t QR_Pixel, uint16_t x, uint16_t y, char *string) {
   DWIN_Byte(i, QR_Pixel);
   DWIN_Text(i, string);
   DWIN_Send(i);
-}
-
-// Draw an Icon with transparent background
-//  libID: Icon library ID
-//  picID: Icon ID
-//  x/y: Upper-left point
-void DWIN_ICON_Show(uint8_t libID, uint8_t picID, uint16_t x, uint16_t y) {
-  DWIN_ICON_Show(false, false, true, libID, picID, x, y);
 }
 
 // Copy area from current virtual display area to current screen
@@ -126,12 +110,33 @@ void DWIN_WriteToMem(uint8_t mem, uint16_t addr, uint16_t length, uint8_t *data)
     DWIN_Byte(i, mem);
     DWIN_Word(i, addr + indx); // start address of the data block
     ++i;
-    LOOP_L_N(j, i) { LCD_SERIAL.write(DWIN_SendBuf[j]); delayMicroseconds(1); }  // Buf header
-    for (uint16_t j = indx; j <= indx + to_send - 1; j++) LCD_SERIAL.write(*(data + j)); delayMicroseconds(1);  // write block of data
-    LOOP_L_N(j, 4) { LCD_SERIAL.write(DWIN_BufTail[j]); delayMicroseconds(1); }
+    for (uint8_t j = 0; j < i; ++j) { LCD_SERIAL.write(DWIN_SendBuf[j]); delayMicroseconds(1); }  // Buf header
+    for (uint16_t j = indx; j <= indx + to_send - 1; j++) { LCD_SERIAL.write(*(data + j)); delayMicroseconds(1); } // write block of data
+    for (uint8_t j = 0; j < 4; ++j) { LCD_SERIAL.write(DWIN_BufTail[j]); delayMicroseconds(1); }
     block++;
     pending -= to_send;
   }
+}
+
+// Draw an Icon from SRAM without background transparency for DACAI Screens support
+void DACAI_ICON_Show(uint16_t x, uint16_t y, uint16_t addr) {
+  NOMORE(x, DWIN_WIDTH - 1);
+  NOMORE(y, DWIN_HEIGHT - 1);
+  size_t i = 0;
+  DWIN_Byte(i, 0x70);
+  DWIN_Word(i, x);
+  DWIN_Word(i, y);
+  DWIN_Word(i, addr);
+  DWIN_Send(i);
+}
+
+void DWIN_ICON_Show(uint16_t x, uint16_t y, uint16_t addr) {
+  #if ENABLED(DACAI_DISPLAY) || DISABLED(DWIN_DISPLAY)
+    DACAI_ICON_Show(x, y, addr);
+  #endif
+  #if ENABLED(DWIN_DISPLAY) || DISABLED(DACAI_DISPLAY)
+    DWIN_ICON_Show(0, 0, 1, x, y, addr);
+  #endif
 }
 
 // Write the contents of the 32KB SRAM data memory into the designated image memory space.

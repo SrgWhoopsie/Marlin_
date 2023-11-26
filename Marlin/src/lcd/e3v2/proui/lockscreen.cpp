@@ -1,13 +1,12 @@
 /**
- * Marlin 3D Printer Firmware
- * Copyright (c) 2021 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
- *
- * Based on Sprinter and grbl.
- * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
+ * Lock screen implementation for PRO UI
+ * Author: Miguel A. Risco-Castillo (MRISCOC)
+ * Version: 2.3.3
+ * Date: 2022/11/20
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,40 +14,31 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
 
-/**
- * Lock screen implementation for PRO UI
- * Author: Miguel A. Risco-Castillo (MRISCOC)
- * Version: 2.3.2
- * Date: 2022/11/20
- */
-
 #include "../../../inc/MarlinConfigPre.h"
 
-#if BOTH(DWIN_LCD_PROUI, HAS_LOCKSCREEN)
+#if ALL(DWIN_LCD_PROUI, HAS_LOCKSCREEN)
 
-#include "dwin_defines.h"
-#include "dwinui.h"
 #include "dwin.h"
 #include "lockscreen.h"
 
-LockScreenClass lockScreen;
+LockScreen lockScreen;
 
-uint8_t LockScreenClass::lock_pos = 0;
-bool LockScreenClass::unlocked = false;
-uint8_t LockScreenClass::rprocess = 0;
+uint8_t LockScreen::lock_pos = 0;
+bool LockScreen::unlocked = false;
+uint8_t LockScreen::rprocess = 0;
 
-void LockScreenClass::init() {
+void LockScreen::init() {
   lock_pos = 0;
   unlocked = false;
   draw();
 }
 
-void LockScreenClass::draw() {
+void LockScreen::draw() {
   Title.SetCaption(GET_TEXT_F(MSG_LOCKSCREEN));
   DWINUI::ClearMainArea();
   DWINUI::Draw_Icon(ICON_LOGO, 71, 120);  // CREALITY logo
@@ -60,7 +50,7 @@ void LockScreenClass::draw() {
   DWIN_UpdateLCD();
 }
 
-void LockScreenClass::onEncoder(EncoderState encoder_diffState) {
+void LockScreen::onEncoder(EncoderState encoder_diffState) {
   switch (encoder_diffState) {
     case ENCODER_DIFF_CW:    lock_pos += 8; break;
     case ENCODER_DIFF_CCW:   lock_pos -= 8; break;

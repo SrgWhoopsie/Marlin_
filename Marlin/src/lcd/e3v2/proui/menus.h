@@ -1,13 +1,12 @@
 /**
- * Marlin 3D Printer Firmware
- * Copyright (c) 2022 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
- *
- * Based on Sprinter and grbl.
- * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
+ * Menu functions for ProUI
+ * Author: Miguel A. Risco-Castillo
+ * Version: 1.10.1
+ * Date: 2022/05/01
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,23 +14,19 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
 #pragma once
 
-/**
- * Menu functions for ProUI
- * Author: Miguel A. Risco-Castillo
- * Version: 1.9.1
- * Date: 2022/12/02
- */
-
 #include "dwinui.h"
 
 #define MENU_CHAR_LIMIT  24
-#define MENU_MAX_ITEMS   TERN(SDSORT_LIMIT, SDSORT_LIMIT, 64)
+
+#ifndef MENU_MAX_ITEMS
+  #define MENU_MAX_ITEMS 100
+#endif
 
 typedef struct {
   int32_t MaxValue     = 0;        // Auxiliar max integer/scaled float value
@@ -51,7 +46,6 @@ extern MenuData_t MenuData;
 // Create and add a MenuItem object to the menu array
 #define SET_MENU(I,L,V) SetMenu(I, GET_TEXT_F(L), V)
 #define SET_MENU_F(I,L,V) SetMenu(I, F(L), V)
-#define SET_MENU_R(I,R,L,V) SetMenu(I, R, GET_TEXT_F(L), V)
 
 #define BACK_ITEM(H) MenuItemAdd(ICON_Back, GET_TEXT_F(MSG_BUTTON_BACK), onDrawMenuItem, H)
 #define MENU_ITEM(I,L,V...) MenuItemAdd(I, GET_TEXT_F(L), V)
@@ -90,7 +84,7 @@ public:
   MenuItemClass(uint8_t cicon, const char * const text=nullptr, OnDrawItem ondraw=nullptr, OnClickItem onclick=nullptr);
   MenuItemClass(uint8_t cicon, uint8_t id, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, OnDrawItem ondraw=nullptr, OnClickItem onclick=nullptr);
   void SetFrame(uint8_t id, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
-  void SetCaption(const char * const text = nullptr);
+  void SetCaption(const char * const text=nullptr);
 };
 
 class MenuItemPtrClass: public MenuItemClass {
@@ -107,9 +101,9 @@ public:
   int8_t selected = 0;
   TitleClass MenuTitle;
   MenuClass();
-  virtual ~MenuClass(){};
-  inline int8_t line() { return selected - topline; };
-  inline int8_t line(uint8_t pos) {return pos - topline; };
+  virtual ~MenuClass(){}
+  inline int8_t line() { return selected - topline; }
+  inline int8_t line(uint8_t pos) {return pos - topline; }
   int8_t count();
   virtual void draw();
   virtual void onScroll(bool dir);
@@ -123,7 +117,6 @@ extern MenuClass *PreviousMenu;
 // Menuitem Drawing functions =================================================
 
 void Draw_Title(TitleClass* title);
-void Draw_Menu(MenuClass* menu);
 void Draw_Menu_Cursor(const int8_t line);
 void Erase_Menu_Cursor(const int8_t line);
 void Erase_Menu_Text(const int8_t line);
@@ -141,22 +134,22 @@ void onDrawPInt8Menu(MenuItemClass* menuitem, int8_t line);
 void onDrawPInt32Menu(MenuItemClass* menuitem, int8_t line);
 void onDrawFloatMenu(MenuItemClass* menuitem, int8_t line, uint8_t dp, const float value);
 void onDrawPFloatMenu(MenuItemClass* menuitem, int8_t line, uint8_t dp);
-inline void onDrawPFloatMenu(MenuItemClass* menuitem, int8_t line) { onDrawPFloatMenu(menuitem, line, UNITFDIGITS); };
-inline void onDrawPFloat2Menu(MenuItemClass* menuitem, int8_t line) { onDrawPFloatMenu(menuitem, line, 2); };
-inline void onDrawPFloat3Menu(MenuItemClass* menuitem, int8_t line) { onDrawPFloatMenu(menuitem, line, 3); };
-inline void onDrawPFloat4Menu(MenuItemClass* menuitem, int8_t line) { onDrawPFloatMenu(menuitem, line, 4); };
+inline void onDrawPFloatMenu(MenuItemClass* menuitem, int8_t line) { onDrawPFloatMenu(menuitem, line, UNITFDIGITS); }
+inline void onDrawPFloat2Menu(MenuItemClass* menuitem, int8_t line) { onDrawPFloatMenu(menuitem, line, 2); }
+inline void onDrawPFloat3Menu(MenuItemClass* menuitem, int8_t line) { onDrawPFloatMenu(menuitem, line, 3); }
+inline void onDrawPFloat4Menu(MenuItemClass* menuitem, int8_t line) { onDrawPFloatMenu(menuitem, line, 4); }
 void onDrawChkbMenu(MenuItemClass* menuitem, int8_t line, bool checked);
 void onDrawChkbMenu(MenuItemClass* menuitem, int8_t line);
 
 // On click functions =========================================================
 
-void SetOnClick(uint8_t process, const int32_t lo, const int32_t hi, uint8_t dp, const int32_t val, void (*Apply)() = nullptr, void (*LiveUpdate)() = nullptr);
-void SetValueOnClick(uint8_t process, const int32_t lo, const int32_t hi, const int32_t val, void (*Apply)() = nullptr, void (*LiveUpdate)() = nullptr);
-void SetValueOnClick(uint8_t process, const float lo, const float hi, uint8_t dp, const float val, void (*Apply)() = nullptr, void (*LiveUpdate)() = nullptr);
-void SetIntOnClick(const int32_t lo, const int32_t hi, const int32_t val, void (*Apply)() = nullptr, void (*LiveUpdate)() = nullptr);
-void SetPIntOnClick(const int32_t lo, const int32_t hi, void (*Apply)() = nullptr, void (*LiveUpdate)() = nullptr);
-void SetFloatOnClick(const float lo, const float hi, uint8_t dp, const float val, void (*Apply)() = nullptr, void (*LiveUpdate)() = nullptr);
-void SetPFloatOnClick(const float lo, const float hi, uint8_t dp, void (*Apply)() = nullptr, void (*LiveUpdate)() = nullptr);
+void SetOnClick(uint8_t process, const int32_t lo, const int32_t hi, uint8_t dp, const int32_t val, void (*Apply)()=nullptr, void (*LiveUpdate)()=nullptr);
+void SetValueOnClick(uint8_t process, const int32_t lo, const int32_t hi, const int32_t val, void (*Apply)()=nullptr, void (*LiveUpdate)()=nullptr);
+void SetValueOnClick(uint8_t process, const float lo, const float hi, uint8_t dp, const float val, void (*Apply)()=nullptr, void (*LiveUpdate)()=nullptr);
+void SetIntOnClick(const int32_t lo, const int32_t hi, const int32_t val, void (*Apply)()=nullptr, void (*LiveUpdate)()=nullptr);
+void SetPIntOnClick(const int32_t lo, const int32_t hi, void (*Apply)()=nullptr, void (*LiveUpdate)()=nullptr);
+void SetFloatOnClick(const float lo, const float hi, uint8_t dp, const float val, void (*Apply)()=nullptr, void (*LiveUpdate)()=nullptr);
+void SetPFloatOnClick(const float lo, const float hi, uint8_t dp, void (*Apply)()=nullptr, void (*LiveUpdate)()=nullptr);
 
 // HMI user control functions =================================================
 
@@ -173,16 +166,21 @@ void InitMenu();
 
 // Create a new menu
 bool SetMenu(MenuClass* &menu, FSTR_P title, int8_t totalitems);
-bool SetMenu(MenuClass* &menu, frame_rect_t cn, FSTR_P title, int8_t totalitems);
+
+// Reset top line and selected item
+void ResetMenu(MenuClass* &menu);
 
 // Invalidate CurrentMenu to prepare for full menu drawing
 void InvalidateMenu();
 
-//Update the Menu and Draw if it is valid
+// Update the Menu and Draw if it is valid
 void UpdateMenu(MenuClass* &menu);
 
-//Redraw the current Menu if it is valid
+// Redraw the current Menu if it is valid
 void ReDrawMenu(bool force = false);
+
+// Redraw selected menu item
+void ReDrawItem();
 
 // Clear MenuItems array and free MenuItems elements
 void MenuItemsClear();
@@ -196,7 +194,7 @@ bool IsMenu(MenuClass* menu);
 // Add elements to the MenuItems array
 CustomMenuItemClass* MenuItemAdd(OnDrawItem ondraw=nullptr, OnClickItem onclick=nullptr);
 MenuItemClass* MenuItemAdd(uint8_t cicon, const char * const text=nullptr, OnDrawItem ondraw=nullptr, OnClickItem onclick=nullptr);
-inline MenuItemClass* MenuItemAdd(uint8_t cicon, FSTR_P text = nullptr, OnDrawItem ondraw=nullptr, OnClickItem onclick=nullptr) {
+inline MenuItemClass* MenuItemAdd(uint8_t cicon, FSTR_P text=nullptr, OnDrawItem ondraw=nullptr, OnClickItem onclick=nullptr) {
   return MenuItemAdd(cicon, FTOP(text), ondraw, onclick);
 }
 MenuItemClass* MenuItemAdd(uint8_t cicon, uint8_t id, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, OnDrawItem ondraw=nullptr, OnClickItem onclick=nullptr);

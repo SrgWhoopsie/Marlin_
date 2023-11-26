@@ -7,7 +7,9 @@ if pioutil.is_pio_build():
     import shutil
     from os.path import join, isfile
     from pprint import pprint
-
+    from SCons.Script import Import
+    from SCons.Script import DefaultEnvironment
+    env = DefaultEnvironment()
     Import("env")
 
     if env.MarlinHas("POSTMORTEM_DEBUGGING"):
@@ -23,7 +25,7 @@ if pioutil.is_pio_build():
 
             assert isfile(original_file) and isfile(src_file)
             shutil.copyfile(original_file, backup_file)
-            shutil.copyfile(src_file, original_file);
+            shutil.copyfile(src_file, original_file)
 
             def _touch(path):
                 with open(path, "w") as fp:
