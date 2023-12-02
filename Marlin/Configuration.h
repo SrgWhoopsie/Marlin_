@@ -1243,7 +1243,7 @@
  * Override with M92
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 400, 98 }
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 79.76, 80.15, 401.83, 97.62 }
 
 //#define LIMITED_MAX_STEPS_EDITING
 #if ENABLED(LIMITED_MAX_STEPS_EDITING)
@@ -1255,7 +1255,7 @@
  * Override with M203
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_MAX_FEEDRATE          { 800, 800, 18, 120 }
+#define DEFAULT_MAX_FEEDRATE          { 800, 800, 30, 120 }
 
 //#define LIMITED_MAX_FR_EDITING        // Limit edit via M203 or LCD to DEFAULT_MAX_FEEDRATE * 2
 #if ENABLED(LIMITED_MAX_FR_EDITING)
@@ -1268,7 +1268,7 @@
  * Override with M201
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_MAX_ACCELERATION      { 800, 800, 120, 1200 }
+#define DEFAULT_MAX_ACCELERATION      { 800, 800, 100, 900 }
 
 //#define LIMITED_MAX_ACCEL_EDITING     // Limit edit via M201 or LCD to DEFAULT_MAX_ACCELERATION * 2
 #if ENABLED(LIMITED_MAX_ACCEL_EDITING)
@@ -1286,8 +1286,8 @@
  *   M204 J    Angular Travel Acceleration
  */
 #define DEFAULT_ACCELERATION                   800  // X, Y, Z and E acceleration for printing moves
-#define DEFAULT_RETRACT_ACCELERATION           800  // E acceleration for retracts
-#define DEFAULT_TRAVEL_ACCELERATION           1000  // X, Y, Z acceleration for travel (non printing) moves
+#define DEFAULT_RETRACT_ACCELERATION           850  // E acceleration for retracts
+#define DEFAULT_TRAVEL_ACCELERATION            800  // X, Y, Z acceleration for travel (non printing) moves
 #if ENABLED(AXIS4_ROTATES)
   #define DEFAULT_ANGULAR_ACCELERATION        3000  // I, J, K acceleration for rotational-only printing moves
   #define DEFAULT_ANGULAR_TRAVEL_ACCELERATION 3000  // I, J, K acceleration for rotational-only travel (non printing) moves
@@ -1321,7 +1321,7 @@
   #endif
 #endif
 
-#define DEFAULT_EJERK    5.0  // May be used by Linear Advance
+#define DEFAULT_EJERK    4.0  // May be used by Linear Advance
 
 /**
  * Junction Deviation Factor
@@ -1331,7 +1331,7 @@
  *   https://blog.kyneticcnc.com/2018/10/computing-junction-deviation-for-marlin.html
  */
 #if DISABLED(CLASSIC_JERK)
-  #define JUNCTION_DEVIATION_MM 0.013 // (mm) Distance from real junction edge
+  #define JUNCTION_DEVIATION_MM 0.008 // (mm) Distance from real junction edge
   #define JD_HANDLE_SMALL_SEGMENTS    // Use curvature estimation instead of just the junction angle
                                       // for small segments (< 1mm) with large junction angles (> 135°).
 #endif
@@ -1581,7 +1581,7 @@
  *     |    [-]    |
  *     O-- FRONT --+
  */
-#define NOZZLE_TO_PROBE_OFFSET {-3, -55, -3.4291}                                     //Whoopsie
+#define NOZZLE_TO_PROBE_OFFSET {-3, -55, -3.6}                                     //Whoopsie
 
 // Enable and set to use a specific tool for probing. Disable to allow any tool.
 //#define PROBING_TOOL 0
@@ -1597,7 +1597,7 @@
 #define XY_PROBE_FEEDRATE (180*60)
 
 // Feedrate (mm/min) for the first approach when double-probing (MULTIPLE_PROBING == 2)
-#define Z_PROBE_FEEDRATE_FAST (9*60)
+#define Z_PROBE_FEEDRATE_FAST (8*60)
 
 // Feedrate (mm/min) for the "accurate" probe of each point
 #define Z_PROBE_FEEDRATE_SLOW (Z_PROBE_FEEDRATE_FAST / 2)
@@ -1664,10 +1664,10 @@
  * Example: `M851 Z-5` with a CLEARANCE of 4  =>  9mm from bed to nozzle.
  *     But: `M851 Z+1` with a CLEARANCE of 2  =>  2mm from bed to nozzle.
  */
-#define Z_CLEARANCE_DEPLOY_PROBE   10 // (mm) Z Clearance for Deploy/Stow
-#define Z_CLEARANCE_BETWEEN_PROBES  5 // (mm) Z Clearance between probe points
-#define Z_CLEARANCE_MULTI_PROBE     5 // (mm) Z Clearance between multiple probes
-#define Z_PROBE_ERROR_TOLERANCE     3 // (mm) Tolerance for early trigger (<= -probe.offset.z + ZPET)
+#define Z_CLEARANCE_DEPLOY_PROBE   7 // (mm) Z Clearance for Deploy/Stow
+#define Z_CLEARANCE_BETWEEN_PROBES  3 // (mm) Z Clearance between probe points
+#define Z_CLEARANCE_MULTI_PROBE     3 // (mm) Z Clearance between multiple probes
+#define Z_PROBE_ERROR_TOLERANCE     2 // (mm) Tolerance for early trigger (<= -probe.offset.z + ZPET)
 //#define Z_AFTER_PROBING           5 // (mm) Z position after probing is done
 
 #define Z_PROBE_LOW_POINT          -2 // (mm) Farthest distance below the trigger-point to go before stopping
@@ -2085,7 +2085,7 @@
    */
   #define ENABLE_LEVELING_FADE_HEIGHT
   #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
-    #define DEFAULT_LEVELING_FADE_HEIGHT 10.0 // (mm) Default fade height.
+    #define DEFAULT_LEVELING_FADE_HEIGHT 40.0 // (mm) Default fade height.
   #endif
 
   /**
@@ -2418,10 +2418,10 @@
 #define PREHEAT_3_TEMP_BED     50
 #define PREHEAT_3_FAN_SPEED     0
 
-//#define PREHEAT_4_LABEL       "TPU"
-//#define PREHEAT_4_TEMP_HOTEND 230
-//#define PREHEAT_4_TEMP_BED     80
-//#define PREHEAT_4_FAN_SPEED     128 // Value from 0 to 255
+#define PREHEAT_4_LABEL       "BED MESH"
+#define PREHEAT_4_TEMP_HOTEND   0
+#define PREHEAT_4_TEMP_BED     60
+#define PREHEAT_4_FAN_SPEED    0 // Value from 0 to 255
 
 //#define PREHEAT_5_LABEL       "CUSTOM"  //NYLON
 //#define PREHEAT_5_TEMP_HOTEND 240
@@ -3454,7 +3454,7 @@
   #define MEDIASORT_MENU_ITEM   // Menu item: enable/disable file list sorting (104 bytes of flash)
   #define ENC_MENU_ITEM         // Menu item: faster/slower encoder rate (272 bytes of flash)
   #define SHOW_SPEED_IND        // Menu item: blink speed in mm/s along with speed percentage (296 bytes of flash)
-  //#define NO_BLINK_IND        // Disables dashboard icon blink indicator highlighted background
+  #define NO_BLINK_IND        // Disables dashboard icon blink indicator highlighted background
 
 #endif
 
